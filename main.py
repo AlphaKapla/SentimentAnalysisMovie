@@ -52,3 +52,39 @@ print('Number of documents:', len(train_texts_reduced))
 
 train_texts_splt, val_texts, train_labels_splt, val_labels = train_test_split(train_texts_reduced, train_labels_reduced, test_size=.2)
 
+# Create and fit the vectorizer to the training data
+from sklearn.feature_extraction.text import CountVectorizer
+vectorizer = CountVectorizer()
+train_bow = vectorizer.fit_transform(train_texts_splt)
+
+print(train_bow.shape)
+
+# Transform the validation data
+validation_bow = vectorizer.transform(val_texts) 
+
+print(validation_bow.shape)
+from sklearn.naive_bayes import MultinomialNB
+X = train_bow.toarray()
+print("X shape",X.shape)
+Y = train_labels_splt
+print("Y shape",Y.shape)
+clf = MultinomialNB()
+clf.fit(X, Y)
+
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
+
+# Test it on the validation data 
+validation_predictions = clf.predict(validation_bow.toarray())
+
+# Calculate the confusion matrix
+cm = confusion_matrix(val_labels, validation_predictions)
+
+# Display the confusion matrix
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf.classes_)
+disp.plot()
+
+# Keep the plot window open
+plt.show() 
+
+# Print the classification report
+print(classification_report(val_labels, validation_predictions))
