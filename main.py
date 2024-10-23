@@ -84,7 +84,57 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf.classes_)
 disp.plot()
 
 # Keep the plot window open
-plt.show() 
+# plt.show() 
 
 # Print the classification report
 print(classification_report(val_labels, validation_predictions))
+
+# get feature names
+# print(vectorizer.get_feature_names_out()[:100])
+
+from sklearn.pipeline import Pipeline
+
+pipeline_base = Pipeline([
+    ('vect', CountVectorizer(max_features=30000, analyzer='word', stop_words=None)),
+    ('clf', MultinomialNB())])
+
+print("score is monogram =",pipeline_base.fit(train_texts_splt, train_labels_splt).score(val_texts, val_labels))
+
+# Fit and test a pipeline with bigrams,
+
+pipeline_base_bigram = Pipeline([
+    ('vect', CountVectorizer(max_features=30000, ngram_range=(1, 2), analyzer='word', stop_words=None)),
+    ('clf', MultinomialNB())])
+
+print("score is when adding bigram =",pipeline_base_bigram.fit(train_texts_splt, train_labels_splt).score(val_texts, val_labels))
+
+# ... trigrams,
+
+pipeline_base_trigram = Pipeline([
+    ('vect', CountVectorizer(max_features=30000, ngram_range=(1, 3), analyzer='word', stop_words=None)),
+    ('clf', MultinomialNB())])
+
+print("score is when adding trigram =",pipeline_base_trigram.fit(train_texts_splt, train_labels_splt).score(val_texts, val_labels))
+
+# ... and characters.
+
+pipeline_base_trigram_char = Pipeline([
+    ('vect', CountVectorizer(max_features=30000, ngram_range=(1, 3), analyzer='word', stop_words=None, max_df=0.5)),
+    ('clf', MultinomialNB())])
+
+print("score is when adding trigram and dfmax =",pipeline_base_trigram_char.fit(train_texts_splt, train_labels_splt).score(val_texts, val_labels))
+
+## Tf-idf
+
+from sklearn.feature_extraction.text import TfidfTransformer
+
+# Fit and test a pipeline with tf-idf
+
+pipetfidf = Pipeline([
+            ('vect', CountVectorizer(max_features=30000, ngram_range=(1, 2), analyzer='word', stop_words=None, max_df=0.5)),
+            ('tfid', TfidfTransformer()),
+            ('clf', MultinomialNB())]).fit(train_texts_splt)
+
+
+
+#print("score is with tf-idf =",pipeline_tfidf.fit(train_texts_splt, train_labels_splt).score(val_texts, val_labels))
